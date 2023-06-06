@@ -173,14 +173,7 @@ export default {
       };
 
       // Show loading icon
-      swal({
-        title: "Upload in progress",
-        text: "PDF is being uploading...",
-        buttons: false,
-        closeOnClickOutside: false,
-        closeOnEsc: false,
-        icon: "info",
-      });
+
 
       import('html2canvas').then((html2canvas) => {
         html2canvas.default(elementClone, { ...cropOptions }).then(canvas => {
@@ -208,17 +201,17 @@ export default {
             const userId = currentUser.uid;
             const storageRef = ref_storage(storage, `users/${userId}/BloodSugarAnalysis_${dateString}.pdf`);
             const pdfBlob = doc.output('blob');
-
+            doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
             uploadBytes(storageRef, pdfBlob)
                 .then((snapshot) => {
                   console.log('PDF uploaded to Firebase Storage');
-                  doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
+
                   getDownloadURL(snapshot.ref)
                       .then((downloadURL) => {
                         console.log('Download URL:', downloadURL);
 
                         // Hide the loading icon
-                        swal.close();
+
                         swal("Success!", "PDF saved successfully.", "success");
 
                         // Remove the cloned chart element
