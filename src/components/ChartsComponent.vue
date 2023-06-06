@@ -31,12 +31,8 @@
           <v-list-item>
             <v-list-item-content>Time of Minimum Blood Sugar: {{ findTimeOfMinValue() }}</v-list-item-content>
           </v-list-item>
-          <v-list-item>
-            <v-list-item-content>Standard Deviation of Blood Sugar: {{ calculateStandardDeviation() }}</v-list-item-content>
-          </v-list-item>
-          <v-list-item>
-            <v-list-item-content>Median Blood Sugar: {{ calculateMedian() }}</v-list-item-content>
-          </v-list-item>
+
+
         </v-list-item-group>
       </v-card>
     </div>
