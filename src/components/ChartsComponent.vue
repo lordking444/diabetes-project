@@ -11,6 +11,34 @@
           </e-series>
         </e-series-collection>
       </ejs-chart>
+      <v-card id="statistics"  class="pa-5 stats-card" outlined>
+        <v-card-title>
+          <div class="headline">Statistics</div>
+        </v-card-title>
+        <v-list-item-group color="primary">
+          <v-list-item>
+            <v-list-item-content>Average Blood Sugar: {{ calculateAverage() }}</v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>Maximum Blood Sugar: {{ findMaxValue() }}</v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>Time of Maximum Blood Sugar: {{ findTimeOfMaxValue() }}</v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>Minimum Blood Sugar: {{ calculateMinValue() }}</v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>Time of Minimum Blood Sugar: {{ findTimeOfMinValue() }}</v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>Standard Deviation of Blood Sugar: {{ calculateStandardDeviation() }}</v-list-item-content>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>Median Blood Sugar: {{ calculateMedian() }}</v-list-item-content>
+          </v-list-item>
+        </v-list-item-group>
+      </v-card>
     </div>
   </div>
 </template>
@@ -78,6 +106,54 @@ export default {
         console.log("No user is signed in");
       }
     },
+    calculateMinValue() {
+      let min = Math.min.apply(Math, this.salesData.map(function(o) { return o.salesValue; }))
+      return min;
+    },
+    findTimeOfMaxValue() {
+      let max = this.findMaxValue();
+      let timeOfMax = this.salesData.filter(function(o) { return o.salesValue == max; })[0].month;
+      return timeOfMax;
+    },
+    findTimeOfMinValue() {
+      let min = this.calculateMinValue();
+      let timeOfMin = this.salesData.filter(function(o) { return o.salesValue == min; })[0].month;
+      return timeOfMin;
+    },
+    calculateStandardDeviation() {
+      let values = this.salesData.map(function(o) { return o.salesValue; });
+      let avg = this.calculateAverage();
+
+      let squareDiffs = values.map(function(value) {
+        let diff = value - avg;
+        let sqrDiff = diff * diff;
+        return sqrDiff;
+      });
+
+      let avgSquareDiff = squareDiffs.reduce(function(sum, value){
+        return sum + value;
+      }, 0) / squareDiffs.length;
+
+      let stdDev = Math.sqrt(avgSquareDiff);
+      return stdDev.toFixed(2);
+    },
+    calculateMedian() {
+      let values = this.salesData.map(function(o) { return o.salesValue; }).sort((a,b) => a - b);
+      let mid = Math.floor(values.length / 2);
+
+      let median = values.length % 2 !== 0 ? values[mid] : (values[mid - 1] + values[mid]) / 2;
+      return median.toFixed(2);
+    },
+    calculateAverage() {
+      let sum = this.salesData.reduce((previous, current) => {
+        return previous + current.salesValue;
+      }, 0);
+      return (sum / this.salesData.length).toFixed(2);
+    },
+    findMaxValue() {
+      let max = Math.max.apply(Math, this.salesData.map(function(o) { return o.salesValue; }))
+      return max;
+    },
     exportChartToPdf() {
       const currentDate = new Date();
       const dateOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -140,7 +216,7 @@ export default {
             uploadBytes(storageRef, pdfBlob)
                 .then((snapshot) => {
                   console.log('PDF uploaded to Firebase Storage');
-              doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
+                  doc.save(`BloodSugarAnalysis_${dateString}.pdf`);
                   getDownloadURL(snapshot.ref)
                       .then((downloadURL) => {
                         console.log('Download URL:', downloadURL);
@@ -193,5 +269,12 @@ export default {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+.stats-card {
+  font-family: 'Roboto', sans-serif;
+}
+
+.stats-card .v-list-item__content {
+  font-size: 14px;
 }
 </style>
